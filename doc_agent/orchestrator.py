@@ -121,20 +121,20 @@ class Orchestrator:
                 name = mod["name"]
                 cache_path = os.path.join(OUTPUT_DIR, f"analysis_{name}.json")
                 if os.path.exists(cache_path):
+                    print(f"[Analyzer] {name} ← 缓存", flush=True)
                     with open(cache_path, "r", encoding="utf-8") as f:
                         return json.load(f)
                 files = mod.get("files", [])
-                print(f"[Analyzer] 分析模块: {name} ({len(files)} 个文件)")
-                import asyncio as _asyncio
-                await _asyncio.sleep(0.3)  # tiny delay for visual effect
+                print(f"[Analyzer] 分析模块: {name} ({len(files)} 个文件)", flush=True)
                 if self.demo:
+                    await asyncio.sleep(0.5)
                     result = demo_analyze(name, files)
                 else:
                     analyzer = AnalyzerAgent()
                     result = await analyzer.analyze(mod, target_dir)
                 with open(cache_path, "w", encoding="utf-8") as f:
                     json.dump(result, f, ensure_ascii=False, indent=2)
-                print(f"[Analyzer] 完成: {name}")
+                print(f"[Analyzer] 完成: {name} → {cache_path}", flush=True)
                 return result
 
         analyses = await asyncio.gather(*[analyze_module(m) for m in modules])
@@ -145,10 +145,12 @@ class Orchestrator:
                 name = modules[i]["name"]
                 cache_path = os.path.join(OUTPUT_DIR, f"draft_{name}.md")
                 if os.path.exists(cache_path):
+                    print(f"[Writer] {name} ← 缓存", flush=True)
                     with open(cache_path, "r", encoding="utf-8") as f:
                         return f.read()
-                print(f"[Writer] 撰写文档: {name}")
+                print(f"[Writer] 撰写文档: {name}", flush=True)
                 if self.demo:
+                    await asyncio.sleep(0.3)
                     draft = demo_write(analyses[i])
                 else:
                     writer = WriterAgent()
@@ -164,9 +166,10 @@ class Orchestrator:
         for i, mod in enumerate(modules):
             name = mod["name"]
             files = mod.get("files", [])
-            print(f"[Reviewer] 审核文档: {name} (对照 {len(files)} 个源文件)")
+            print(f"[Reviewer] 审核文档: {name} (对照 {len(files)} 个源文件)", flush=True)
             if self.demo:
                 final_doc = demo_review(drafts[i], files)
+                await asyncio.sleep(0.3)
             else:
                 reviewer = ReviewerAgent()
                 final_doc = await reviewer.review(drafts[i], files, target_dir)
@@ -174,7 +177,7 @@ class Orchestrator:
             with open(doc_path, "w", encoding="utf-8") as f:
                 f.write(final_doc)
             final_docs.append(doc_path)
-            print(f"[Reviewer] 校验通过: {name}")
+            print(f"[Reviewer] 校验通过: {name}", flush=True)
 
         print(f"\n[Done] 4-Agent 流水线完成，生成 {len(final_docs)} 份文档 → {DOCS_DIR}/")
         return final_docs
