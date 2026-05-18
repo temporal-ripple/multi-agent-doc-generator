@@ -84,22 +84,35 @@ class Dungeon {
         this.bossRoom = this.rooms[this.rooms.length - 1];
         this.bossRoom.type = ROOM_TYPES.BOSS;
 
-        // Random room is shop
-        const shopIndex = randomInt(2, this.rooms.length - 2);
+        // Need at least 5 rooms for all special types
+        if (this.rooms.length < 5) {
+            // With fewer rooms, only assign shop if possible
+            if (this.rooms.length >= 3) {
+                const shopIndex = randomInt(1, this.rooms.length - 2);
+                this.shopRoom = this.rooms[shopIndex];
+                this.shopRoom.type = ROOM_TYPES.SHOP;
+            }
+            return;
+        }
+
+        // Random room is shop (exclude start and boss)
+        const shopIndex = randomInt(1, this.rooms.length - 2);
         this.shopRoom = this.rooms[shopIndex];
         this.shopRoom.type = ROOM_TYPES.SHOP;
 
-        // Random room is treasure
-        const treasureIndex = randomInt(1, this.rooms.length - 2);
-        if (treasureIndex !== shopIndex) {
-            this.rooms[treasureIndex].type = ROOM_TYPES.TREASURE;
-        }
+        // Random room is treasure (exclude start, boss, and shop)
+        let treasureIndex;
+        do {
+            treasureIndex = randomInt(1, this.rooms.length - 2);
+        } while (treasureIndex === shopIndex);
+        this.rooms[treasureIndex].type = ROOM_TYPES.TREASURE;
 
-        // Random room is trap
-        const trapIndex = randomInt(1, this.rooms.length - 2);
-        if (trapIndex !== shopIndex && trapIndex !== treasureIndex) {
-            this.rooms[trapIndex].type = ROOM_TYPES.TRAP;
-        }
+        // Random room is trap (exclude start, boss, shop, and treasure)
+        let trapIndex;
+        do {
+            trapIndex = randomInt(1, this.rooms.length - 2);
+        } while (trapIndex === shopIndex || trapIndex === treasureIndex);
+        this.rooms[trapIndex].type = ROOM_TYPES.TRAP;
     }
 
     connectRooms() {
