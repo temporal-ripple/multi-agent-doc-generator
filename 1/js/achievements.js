@@ -72,8 +72,17 @@ class AchievementSystem {
             case ACHIEVEMENT_TYPES.FIRST_CLEAR:
                 unlocked = this.progress[type] >= 1;
                 break;
+            case ACHIEVEMENT_TYPES.ALL_CHARACTERS:
+                unlocked = this.progress[type] >= 4; // 4 characters
+                break;
             case ACHIEVEMENT_TYPES.KILL_BOSS:
                 unlocked = this.progress[type] >= 10;
+                break;
+            case ACHIEVEMENT_TYPES.NO_DAMAGE_FLOOR:
+                unlocked = this.progress[type] >= 1;
+                break;
+            case ACHIEVEMENT_TYPES.COLLECT_ALL:
+                unlocked = this.progress[type] >= 8; // 8 item types
                 break;
             case ACHIEVEMENT_TYPES.ELITE_KILLER:
                 unlocked = this.progress[type] >= 50;
