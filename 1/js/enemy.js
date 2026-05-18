@@ -184,6 +184,9 @@ class Enemy {
         // Give exp
         game.player.addExp(10 + this.floor * 2);
         game.player.enemiesKilled++;
+        if (this.isElite) {
+            game.player.eliteKills++;
+        }
     }
 
     dropLoot() {

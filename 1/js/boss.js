@@ -97,16 +97,8 @@ class Boss extends Enemy {
                 room.enemies.splice(index, 1);
                 room.cleared = true;
                 room.openDoors();
-
-                // Spawn stairs
-                const stairsRoom = new Room(
-                    room.x + room.width + 2,
-                    room.y,
-                    3, 3,
-                    ROOM_TYPES.STAIRS
-                );
-                game.dungeon.rooms.push(stairsRoom);
-                game.dungeon.stairsRoom = stairsRoom;
+                // Convert boss room to stairs room so player can progress
+                room.type = ROOM_TYPES.STAIRS;
             }
         }
 
@@ -114,6 +106,9 @@ class Boss extends Enemy {
         this.dropBossLoot();
         game.player.addExp(100 + this.floor * 20);
         game.player.enemiesKilled++;
+
+        // Track boss kill achievement
+        achievements.check(ACHIEVEMENT_TYPES.KILL_BOSS);
     }
 
     dropBossLoot() {

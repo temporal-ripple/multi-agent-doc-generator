@@ -14,7 +14,7 @@ class Game {
 
         this.lastTime = 0;
         this.deltaTime = 0;
-        this._lastEnemiesKilled = 0;
+        this._lastEliteKills = 0;
 
         this.init();
     }
@@ -29,7 +29,7 @@ class Game {
     startGame(characterType) {
         this.state = GAME_STATES.PLAYING;
         this.currentFloor = 1;
-        this._lastEnemiesKilled = 0;
+        this._lastEliteKills = 0;
         this.player = new Player(characterType);
         this.dungeon = new Dungeon(this.currentFloor);
         this.dungeon.generate();
@@ -40,7 +40,7 @@ class Game {
     }
 
     gameLoop(timestamp) {
-        this.deltaTime = (timestamp - this.lastTime) / 1000;
+        this.deltaTime = Math.min((timestamp - this.lastTime) / 1000, 0.1);
         this.lastTime = timestamp;
 
         if (this.state === GAME_STATES.PLAYING) {
@@ -58,10 +58,10 @@ class Game {
         this.dungeon.update(this.deltaTime, this.player);
         this.ui.updateHUD();
 
-        // Check achievements (delta tracking to avoid inflating progress)
-        if (this.player.enemiesKilled !== this._lastEnemiesKilled) {
-            const delta = this.player.enemiesKilled - this._lastEnemiesKilled;
-            this._lastEnemiesKilled = this.player.enemiesKilled;
+        // Check elite killer achievement (delta tracking)
+        if (this.player.eliteKills !== this._lastEliteKills) {
+            const delta = this.player.eliteKills - this._lastEliteKills;
+            this._lastEliteKills = this.player.eliteKills;
             achievements.check(ACHIEVEMENT_TYPES.ELITE_KILLER, delta);
         }
     }
@@ -76,6 +76,12 @@ class Game {
     }
 
     nextFloor() {
+        // Check no-damage floor achievement before resetting
+        if (this.player.floorDamageTaken === 0) {
+            achievements.check(ACHIEVEMENT_TYPES.NO_DAMAGE_FLOOR);
+        }
+        this.player.floorDamageTaken = 0;
+
         this.currentFloor++;
         if (this.currentFloor > 10) {
             this.victory();
@@ -99,6 +105,8 @@ class Game {
 
     victory() {
         this.state = GAME_STATES.VICTORY;
+        // Track character completion for ALL_CHARACTERS achievement
+        achievements.trackCharacterCompletion(this.player.characterType);
         this.ui.showVictory();
     }
 

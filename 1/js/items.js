@@ -85,4 +85,5 @@ function applyEquipment(player, type) {
             player.armor = type;
             break;
     }
+    achievements.trackItemCollection(type);
 }

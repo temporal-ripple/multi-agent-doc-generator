@@ -208,3 +208,36 @@ body {
     color: #95a5a6;
     margin-top: 5px;
 }
+
+.achievement-notification {
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(243, 156, 18, 0.95);
+    padding: 10px 24px;
+    border-radius: 8px;
+    text-align: center;
+    z-index: 100;
+    pointer-events: none;
+    animation: achievementFade 3s ease-in-out forwards;
+}
+
+.achievement-notification-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff;
+}
+
+.achievement-notification-name {
+    font-size: 16px;
+    color: #1a1a2e;
+    margin-top: 4px;
+}
+
+@keyframes achievementFade {
+    0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+    10% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    80% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+}

@@ -2,6 +2,7 @@ class UI {
     constructor(game) {
         this.game = game;
         this.shop = new Shop();
+        this._lastInventory = '';
         this.setupEventListeners();
     }
 
@@ -198,8 +199,11 @@ class UI {
 
     updateInventory(player) {
         const bar = document.getElementById('inventory-bar');
-        bar.innerHTML = '';
+        const currentItems = player.items.slice(0, 6).join(',');
+        if (this._lastInventory === currentItems) return;
+        this._lastInventory = currentItems;
 
+        bar.innerHTML = '';
         player.items.slice(0, 6).forEach((item, index) => {
             const slot = document.createElement('div');
             slot.className = 'inventory-slot';
@@ -207,5 +211,16 @@ class UI {
             slot.title = `${ITEMS[item].name} (${index + 1})`;
             bar.appendChild(slot);
         });
+    }
+
+    showAchievementNotification(achievement) {
+        const notification = document.createElement('div');
+        notification.className = 'achievement-notification';
+        notification.innerHTML = `
+            <div class="achievement-notification-title">成就解锁!</div>
+            <div class="achievement-notification-name">${achievement.name}</div>
+        `;
+        document.getElementById('game-container').appendChild(notification);
+        setTimeout(() => notification.remove(), 3000);
     }
 }

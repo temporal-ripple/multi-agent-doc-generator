@@ -14,6 +14,7 @@ class SaveSystem {
                 atk: game.player.atk,
                 def: game.player.def,
                 spd: game.player.spd,
+                baseSpd: game.player.baseSpd,
                 level: game.player.level,
                 exp: game.player.exp,
                 expToLevel: game.player.expToLevel,
@@ -24,6 +25,7 @@ class SaveSystem {
                 weapon: game.player.weapon,
                 armor: game.player.armor,
                 enemiesKilled: game.player.enemiesKilled,
+                eliteKills: game.player.eliteKills,
                 damageTaken: game.player.damageTaken
             },
             floor: game.currentFloor,
@@ -67,13 +69,12 @@ class SaveSystem {
         game.player = new Player(data.player.characterType);
 
         Object.assign(game.player, {
-            x: data.player.x,
-            y: data.player.y,
             hp: data.player.hp,
             maxHp: data.player.maxHp,
             atk: data.player.atk,
             def: data.player.def,
             spd: data.player.spd,
+            baseSpd: data.player.baseSpd || game.player.baseSpd,
             level: data.player.level,
             exp: data.player.exp,
             expToLevel: data.player.expToLevel,
@@ -84,11 +85,26 @@ class SaveSystem {
             weapon: data.player.weapon,
             armor: data.player.armor,
             enemiesKilled: data.player.enemiesKilled,
+            eliteKills: data.player.eliteKills || 0,
             damageTaken: data.player.damageTaken
         });
 
+        // Reset transient combat state
+        game.player.speedBoostActive = false;
+        game.player.speedBoostTimer = 0;
+        game.player.invincible = false;
+        game.player.invincibleTimer = 0;
+        game.player.attackCooldown = 0;
+        game.player.skillCooldown = 0;
+        game.player.floorDamageTaken = 0;
+
         game.dungeon = new Dungeon(game.currentFloor);
         game.dungeon.generate();
+
+        // Place player at start room (saved position may be inside a wall in regenerated dungeon)
+        game.player.x = game.dungeon.startRoom.x * TILE_SIZE + TILE_SIZE;
+        game.player.y = game.dungeon.startRoom.y * TILE_SIZE + TILE_SIZE;
+
         game.state = GAME_STATES.PLAYING;
 
         if (game.ui) {

@@ -40,6 +40,8 @@ class Player {
         // Stats tracking
         this.damageTaken = 0;
         this.enemiesKilled = 0;
+        this.eliteKills = 0;
+        this.floorDamageTaken = 0;
 
         this.applyCharacterStats(characterType);
         this.baseSpd = this.spd;
@@ -295,6 +297,7 @@ class Player {
         const actualDamage = Math.max(1, damage - this.def);
         this.hp -= actualDamage;
         this.damageTaken += actualDamage;
+        this.floorDamageTaken += actualDamage;
 
         this.invincible = true;
         this.invincibleTimer = 0.5;
@@ -335,12 +338,20 @@ class Player {
 
     addItem(type) {
         this.items.push(type);
+        achievements.trackItemCollection(type);
     }
 
     useItem(index) {
         if (index < 0 || index >= this.items.length) return;
 
         const item = this.items[index];
+
+        // Don't consume equipment if already equipped
+        if ((item === ITEM_TYPES.WEAPON && this.weapon) ||
+            (item === ITEM_TYPES.ARMOR && this.armor)) {
+            return;
+        }
+
         this.items.splice(index, 1);
 
         switch(item) {

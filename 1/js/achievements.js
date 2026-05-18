@@ -37,6 +37,8 @@ class AchievementSystem {
     constructor() {
         this.unlocked = {};
         this.progress = {};
+        this.collectedTypes = new Set();
+        this.completedCharacters = new Set();
 
         this.load();
     }
@@ -47,14 +49,38 @@ class AchievementSystem {
             const data = JSON.parse(saved);
             this.unlocked = data.unlocked || {};
             this.progress = data.progress || {};
+            this.collectedTypes = new Set(data.collectedTypes || []);
+            this.completedCharacters = new Set(data.completedCharacters || []);
         }
     }
 
     save() {
         localStorage.setItem('achievements', JSON.stringify({
             unlocked: this.unlocked,
-            progress: this.progress
+            progress: this.progress,
+            collectedTypes: Array.from(this.collectedTypes),
+            completedCharacters: Array.from(this.completedCharacters)
         }));
+    }
+
+    trackItemCollection(type) {
+        if (this.unlocked[ACHIEVEMENT_TYPES.COLLECT_ALL]) return;
+        this.collectedTypes.add(type);
+        this.progress[ACHIEVEMENT_TYPES.COLLECT_ALL] = this.collectedTypes.size;
+        if (this.collectedTypes.size >= 8) {
+            this.unlock(ACHIEVEMENT_TYPES.COLLECT_ALL);
+        }
+        this.save();
+    }
+
+    trackCharacterCompletion(characterType) {
+        if (this.unlocked[ACHIEVEMENT_TYPES.ALL_CHARACTERS]) return;
+        this.completedCharacters.add(characterType);
+        this.progress[ACHIEVEMENT_TYPES.ALL_CHARACTERS] = this.completedCharacters.size;
+        if (this.completedCharacters.size >= 4) {
+            this.unlock(ACHIEVEMENT_TYPES.ALL_CHARACTERS);
+        }
+        this.save();
     }
 
     check(type, value = 1) {
@@ -104,6 +130,11 @@ class AchievementSystem {
 
         const achievement = ACHIEVEMENTS[type];
         console.log(`Achievement unlocked: ${achievement.name}`);
+
+        // Show notification if game UI is available
+        if (typeof game !== 'undefined' && game.ui) {
+            game.ui.showAchievementNotification(achievement);
+        }
 
         // Unlock character if reward
         if (achievement.unlockCharacter) {

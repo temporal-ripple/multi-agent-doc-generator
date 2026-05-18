@@ -86,7 +86,16 @@ class Room {
             }
         }
 
-        // Generate enemies (only for normal rooms, boss generation handled separately)
+        // Generate boss for boss rooms
+        if (this.type === ROOM_TYPES.BOSS) {
+            const bossX = this.x + Math.floor(this.width / 2);
+            const bossY = this.y + Math.floor(this.height / 2);
+            if (typeof Boss !== 'undefined') {
+                this.enemies.push(new Boss(bossX, bossY, floor));
+            }
+        }
+
+        // Generate enemies (only for normal rooms)
         if (this.type === ROOM_TYPES.NORMAL) {
             const enemyCount = randomInt(2, 4) + Math.floor(floor / 3);
             for (let i = 0; i < enemyCount; i++) {
@@ -97,7 +106,6 @@ class Room {
                 }
             }
         }
-        // Note: Boss rooms - boss will be spawned by Dungeon system
 
         // Generate traps
         if (this.type === ROOM_TYPES.TRAP || this.type === ROOM_TYPES.NORMAL) {
