@@ -48,7 +48,7 @@ class Renderer {
         this.ctx.fillStyle = color;
         this.ctx.font = `${size}px 'Courier New'`;
         this.ctx.textAlign = align;
-        this.ctx.fillText(text, x - this.camera.x, y - this.camera.y);
+        this.ctx.fillText(text, Math.floor(x - this.camera.x), Math.floor(y - this.camera.y));
     }
 
     drawPixelChar(x, y, color, size = TILE_SIZE) {
