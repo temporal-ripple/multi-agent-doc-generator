@@ -47,45 +47,75 @@ class Room {
             this.type === ROOM_TYPES.EMPTY) {
             return;
         }
+        // HIDDEN rooms generate content like NORMAL rooms (enemies, obstacles, etc.)
+
+        // Guard against rooms too small for content
+        if (this.width < 4 || this.height < 4) {
+            return;
+        }
+
+        // Track occupied positions to prevent overlap
+        const occupied = new Set();
+
+        // Helper to get random unoccupied position
+        const getRandomPos = () => {
+            let attempts = 0;
+            while (attempts < 50) {
+                const x = randomInt(this.x + 1, this.x + this.width - 2);
+                const y = randomInt(this.y + 1, this.y + this.height - 2);
+                const key = `${x},${y}`;
+                if (!occupied.has(key)) {
+                    occupied.add(key);
+                    return { x, y };
+                }
+                attempts++;
+            }
+            return null;
+        };
 
         // Generate obstacles
         const obstacleCount = randomInt(2, 5);
         for (let i = 0; i < obstacleCount; i++) {
-            const ox = randomInt(this.x + 1, this.x + this.width - 2);
-            const oy = randomInt(this.y + 1, this.y + this.height - 2);
-            this.obstacles.push({
-                x: ox,
-                y: oy,
-                breakable: Math.random() > 0.5
-            });
+            const pos = getRandomPos();
+            if (pos) {
+                this.obstacles.push({
+                    x: pos.x,
+                    y: pos.y,
+                    breakable: Math.random() > 0.5
+                });
+            }
         }
 
-        // Generate enemies (only for normal and boss rooms)
+        // Generate enemies (only for normal rooms, boss generation handled separately)
         if (this.type === ROOM_TYPES.NORMAL) {
             const enemyCount = randomInt(2, 4) + Math.floor(floor / 3);
             for (let i = 0; i < enemyCount; i++) {
-                const ex = randomInt(this.x + 1, this.x + this.width - 2);
-                const ey = randomInt(this.y + 1, this.y + this.height - 2);
-                const isElite = Math.random() < 0.1 + floor * 0.02;
-                this.enemies.push(new Enemy(ex, ey, floor, isElite));
+                const pos = getRandomPos();
+                if (pos && typeof Enemy !== 'undefined') {
+                    const isElite = Math.random() < 0.1 + floor * 0.02;
+                    this.enemies.push(new Enemy(pos.x, pos.y, floor, isElite));
+                }
             }
         }
+        // Note: Boss rooms - boss will be spawned by Dungeon system
 
         // Generate traps
         if (this.type === ROOM_TYPES.TRAP || this.type === ROOM_TYPES.NORMAL) {
             const trapCount = this.type === ROOM_TYPES.TRAP ? randomInt(5, 8) : randomInt(0, 2);
             for (let i = 0; i < trapCount; i++) {
-                const tx = randomInt(this.x + 1, this.x + this.width - 2);
-                const ty = randomInt(this.y + 1, this.y + this.height - 2);
-                this.traps.push({ x: tx, y: ty, active: true, damage: 10 + floor * 2 });
+                const pos = getRandomPos();
+                if (pos) {
+                    this.traps.push({ x: pos.x, y: pos.y, active: true, damage: 10 + floor * 2 });
+                }
             }
         }
 
         // Generate chests
         if (this.type === ROOM_TYPES.TREASURE || Math.random() < 0.2) {
-            const cx = randomInt(this.x + 1, this.x + this.width - 2);
-            const cy = randomInt(this.y + 1, this.y + this.height - 2);
-            this.chests.push({ x: cx, y: cy, opened: false });
+            const pos = getRandomPos();
+            if (pos) {
+                this.chests.push({ x: pos.x, y: pos.y, opened: false });
+            }
         }
     }
 
