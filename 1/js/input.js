@@ -8,10 +8,18 @@ class Input {
 
     setupListeners() {
         window.addEventListener('keydown', (e) => {
+            const gameKeys = ['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space','KeyQ','KeyE'];
+            if (gameKeys.includes(e.code)) e.preventDefault();
             if (!this.keys[e.code]) {
                 this.justPressed[e.code] = true;
             }
             this.keys[e.code] = true;
+        });
+
+        window.addEventListener('blur', () => {
+            this.keys = {};
+            this.justPressed = {};
+            this.mouse.clicked = false;
         });
 
         window.addEventListener('keyup', (e) => {
