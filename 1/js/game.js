@@ -58,8 +58,7 @@ class Game {
     }
 
     render() {
-        this.ctx.fillStyle = '#1a1a2e';
-        this.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        this.renderer.clear();
 
         if (this.state === GAME_STATES.PLAYING) {
             this.dungeon.render(this.renderer, this.player);
