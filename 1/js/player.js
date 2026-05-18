@@ -4,7 +4,6 @@ class Player {
         this.y = 0;
         this.width = TILE_SIZE;
         this.height = TILE_SIZE;
-        this.speed = 120;
         this.characterType = characterType;
 
         // Stats
@@ -24,6 +23,8 @@ class Player {
         this.attackRange = TILE_SIZE * 1.5;
         this.invincible = false;
         this.invincibleTimer = 0;
+        this.speedBoostTimer = 0;
+        this.speedBoostActive = false;
 
         // Skill
         this.skillCooldown = 0;
@@ -41,6 +42,7 @@ class Player {
         this.enemiesKilled = 0;
 
         this.applyCharacterStats(characterType);
+        this.baseSpd = this.spd;
     }
 
     applyCharacterStats(type) {
@@ -83,6 +85,12 @@ class Player {
     update(deltaTime, dungeon) {
         // Movement
         const dir = input.getDirection();
+        // Normalize diagonal movement
+        if (dir.dx !== 0 && dir.dy !== 0) {
+            const len = Math.sqrt(dir.dx * dir.dx + dir.dy * dir.dy);
+            dir.dx /= len;
+            dir.dy /= len;
+        }
         const moveX = dir.dx * this.spd * deltaTime;
         const moveY = dir.dy * this.spd * deltaTime;
 
@@ -111,6 +119,15 @@ class Player {
             this.invincibleTimer -= deltaTime;
             if (this.invincibleTimer <= 0) {
                 this.invincible = false;
+            }
+        }
+
+        // Speed boost
+        if (this.speedBoostActive) {
+            this.speedBoostTimer -= deltaTime;
+            if (this.speedBoostTimer <= 0) {
+                this.speedBoostActive = false;
+                this.spd = this.baseSpd;
             }
         }
 
@@ -321,7 +338,7 @@ class Player {
     }
 
     useItem(index) {
-        if (index >= this.items.length) return;
+        if (index < 0 || index >= this.items.length) return;
 
         const item = this.items[index];
         this.items.splice(index, 1);
@@ -341,8 +358,12 @@ class Player {
                 this.invincibleTimer = 3;
                 break;
             case ITEM_TYPES.SPEED:
-                this.spd *= 1.5;
-                setTimeout(() => this.spd /= 1.5, 5000);
+                if (!this.speedBoostActive) {
+                    this.baseSpd = this.spd;
+                }
+                this.spd = this.baseSpd * 1.5;
+                this.speedBoostActive = true;
+                this.speedBoostTimer = 5;
                 break;
         }
     }
