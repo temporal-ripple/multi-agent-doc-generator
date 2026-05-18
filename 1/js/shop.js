@@ -15,10 +15,11 @@ class Shop {
             ITEM_TYPES.SPEED
         ];
 
-        // Add 3-5 random items
+        // Shuffle and pick 3-5 unique items
+        const shuffled = [...availableItems].sort(() => Math.random() - 0.5);
         const count = randomInt(3, 5);
         for (let i = 0; i < count; i++) {
-            const type = randomChoice(availableItems);
+            const type = shuffled[i];
             this.items.push({
                 type: type,
                 price: ITEMS[type].price + floor * 10,
@@ -38,10 +39,14 @@ class Shop {
     }
 
     buyItem(index, player) {
-        if (index >= this.items.length) return false;
+        if (index < 0 || index >= this.items.length) return false;
 
         const item = this.items[index];
         if (item.sold) return false;
+
+        // Check if player already has this equipment
+        if (item.type === ITEM_TYPES.WEAPON && player.weapon) return false;
+        if (item.type === ITEM_TYPES.ARMOR && player.armor) return false;
 
         if (player.gold >= item.price) {
             player.gold -= item.price;
@@ -62,9 +67,9 @@ class Shop {
     render(renderer, player) {
         if (!this.isOpen) return;
 
-        // Draw shop UI
-        const shopX = 100;
-        const shopY = 100;
+        // Draw shop UI - adjust for camera
+        const shopX = renderer.camera.x + 100;
+        const shopY = renderer.camera.y + 100;
         const shopWidth = 600;
         const shopHeight = 400;
 
