@@ -119,6 +119,12 @@ class Room {
         }
     }
 
+    update(deltaTime, player) {
+        this.enemies.forEach(enemy => {
+            enemy.update(deltaTime, player);
+        });
+    }
+
     addDoor(x, y, targetRoom) {
         this.doors.push({ x, y, targetRoom, locked: false, open: false });
     }
