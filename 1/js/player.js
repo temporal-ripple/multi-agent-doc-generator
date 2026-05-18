@@ -365,6 +365,24 @@ class Player {
                 this.speedBoostActive = true;
                 this.speedBoostTimer = 5;
                 break;
+            case ITEM_TYPES.TELEPORT:
+                // Teleport to random room
+                const rooms = game.dungeon.rooms;
+                const randomRoom = rooms[Math.floor(Math.random() * rooms.length)];
+                const center = randomRoom.getCenter();
+                this.x = center.x;
+                this.y = center.y;
+                break;
+            case ITEM_TYPES.WEAPON:
+                if (this.weapon !== item) {
+                    applyEquipment(this, item);
+                }
+                break;
+            case ITEM_TYPES.ARMOR:
+                if (this.armor !== item) {
+                    applyEquipment(this, item);
+                }
+                break;
         }
     }
 

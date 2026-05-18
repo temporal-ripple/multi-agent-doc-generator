@@ -75,8 +75,6 @@ class Item {
 }
 
 function applyEquipment(player, type) {
-    const item = ITEMS[type];
-
     switch(type) {
         case ITEM_TYPES.WEAPON:
             player.atk += 5;
