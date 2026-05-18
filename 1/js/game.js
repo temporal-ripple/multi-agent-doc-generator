@@ -14,6 +14,7 @@ class Game {
 
         this.lastTime = 0;
         this.deltaTime = 0;
+        this._lastEnemiesKilled = 0;
 
         this.init();
     }
@@ -28,6 +29,7 @@ class Game {
     startGame(characterType) {
         this.state = GAME_STATES.PLAYING;
         this.currentFloor = 1;
+        this._lastEnemiesKilled = 0;
         this.player = new Player(characterType);
         this.dungeon = new Dungeon(this.currentFloor);
         this.dungeon.generate();
@@ -55,6 +57,13 @@ class Game {
         this.player.update(this.deltaTime, this.dungeon);
         this.dungeon.update(this.deltaTime, this.player);
         this.ui.updateHUD();
+
+        // Check achievements (delta tracking to avoid inflating progress)
+        if (this.player.enemiesKilled !== this._lastEnemiesKilled) {
+            const delta = this.player.enemiesKilled - this._lastEnemiesKilled;
+            this._lastEnemiesKilled = this.player.enemiesKilled;
+            achievements.check(ACHIEVEMENT_TYPES.ELITE_KILLER, delta);
+        }
     }
 
     render() {
@@ -76,6 +85,10 @@ class Game {
         this.dungeon.generate();
         this.player.x = this.dungeon.startRoom.x * TILE_SIZE + TILE_SIZE;
         this.player.y = this.dungeon.startRoom.y * TILE_SIZE + TILE_SIZE;
+
+        // Auto-save
+        saveSystem.save(this);
+
         this.ui.updateHUD();
     }
 
