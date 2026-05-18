@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>杀戮地牢</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+        <div id="ui-overlay">
+            <div id="hud">
+                <div id="hp-bar">HP: <span id="hp-value">100</span>/<span id="hp-max">100</span></div>
+                <div id="level">Lv: <span id="level-value">1</span></div>
+                <div id="gold">Gold: <span id="gold-value">0</span></div>
+                <div id="floor">Floor: <span id="floor-value">1</span></div>
+            </div>
+            <div id="skill-bar">
+                <div id="skill-icon" class="skill">Q</div>
+                <div id="skill-cooldown"></div>
+            </div>
+            <div id="inventory-bar"></div>
+        </div>
+        <div id="main-menu" class="menu">
+            <h1>杀戮地牢</h1>
+            <button id="btn-start">开始游戏</button>
+            <button id="btn-characters">角色选择</button>
+            <button id="btn-achievements">成就</button>
+        </div>
+        <div id="character-select" class="menu hidden">
+            <h2>选择角色</h2>
+            <div id="character-list"></div>
+            <button id="btn-back">返回</button>
+        </div>
+        <div id="pause-menu" class="menu hidden">
+            <h2>暂停</h2>
+            <button id="btn-resume">继续</button>
+            <button id="btn-save">保存</button>
+            <button id="btn-quit">退出</button>
+        </div>
+        <div id="game-over" class="menu hidden">
+            <h2>游戏结束</h2>
+            <p>你到达了第 <span id="final-floor">1</span> 层</p>
+            <button id="btn-restart">重新开始</button>
+            <button id="btn-main-menu">主菜单</button>
+        </div>
+    </div>
+    <script src="js/constants.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/input.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/enemy.js"></script>
+    <script src="js/boss.js"></script>
+    <script src="js/room.js"></script>
+    <script src="js/dungeon.js"></script>
+    <script src="js/items.js"></script>
+    <script src="js/shop.js"></script>
+    <script src="js/combat.js"></script>
+    <script src="js/achievements.js"></script>
+    <script src="js/save.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>
