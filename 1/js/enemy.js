@@ -18,6 +18,7 @@ class Enemy {
         this.type = this.getRandomType();
         this.moveTimer = 0;
         this.attackCooldown = 0;
+        this.attackRate = 1.5;
         this.patrolPoints = [];
         this.currentPatrolIndex = 0;
 
@@ -54,35 +55,56 @@ class Enemy {
         }
     }
 
-    update(deltaTime, player) {
+    attack(player) {
+        if (this.attackCooldown > 0) return;
+
+        const dist = distance(this.x, this.y, player.x, player.y);
+        const attackRange = TILE_SIZE * 1.5;
+
+        if (dist < attackRange) {
+            player.takeDamage(this.atk);
+            this.attackCooldown = this.attackRate;
+        }
+    }
+
+    update(deltaTime, player, dungeon) {
         this.moveTimer += deltaTime;
         this.attackCooldown -= deltaTime;
 
         switch(this.type) {
             case ENEMY_TYPES.CHASER:
-                this.updateChaser(deltaTime, player);
+                this.updateChaser(deltaTime, player, dungeon);
                 break;
             case ENEMY_TYPES.PATROL:
-                this.updatePatrol(deltaTime, player);
+                this.updatePatrol(deltaTime, player, dungeon);
                 break;
             case ENEMY_TYPES.RANGER:
-                this.updateRanger(deltaTime, player);
+                this.updateRanger(deltaTime, player, dungeon);
                 break;
         }
     }
 
-    updateChaser(deltaTime, player) {
+    updateChaser(deltaTime, player, dungeon) {
         const dx = player.x - this.x;
         const dy = player.y - this.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
         if (dist > 0) {
-            this.x += (dx / dist) * this.speed * deltaTime;
-            this.y += (dy / dist) * this.speed * deltaTime;
+            const newX = this.x + (dx / dist) * this.speed * deltaTime;
+            const newY = this.y + (dy / dist) * this.speed * deltaTime;
+
+            if (dungeon.isWalkable(newX, this.y)) {
+                this.x = newX;
+            }
+            if (dungeon.isWalkable(this.x, newY)) {
+                this.y = newY;
+            }
         }
+
+        this.attack(player);
     }
 
-    updatePatrol(deltaTime, player) {
+    updatePatrol(deltaTime, player, dungeon) {
         const target = this.patrolPoints[this.currentPatrolIndex];
         const dx = target.x - this.x;
         const dy = target.y - this.y;
@@ -91,12 +113,21 @@ class Enemy {
         if (dist < 5) {
             this.currentPatrolIndex = (this.currentPatrolIndex + 1) % this.patrolPoints.length;
         } else {
-            this.x += (dx / dist) * this.speed * deltaTime;
-            this.y += (dy / dist) * this.speed * deltaTime;
+            const newX = this.x + (dx / dist) * this.speed * deltaTime;
+            const newY = this.y + (dy / dist) * this.speed * deltaTime;
+
+            if (dungeon.isWalkable(newX, this.y)) {
+                this.x = newX;
+            }
+            if (dungeon.isWalkable(this.x, newY)) {
+                this.y = newY;
+            }
         }
+
+        this.attack(player);
     }
 
-    updateRanger(deltaTime, player) {
+    updateRanger(deltaTime, player, dungeon) {
         const dx = player.x - this.x;
         const dy = player.y - this.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -105,13 +136,29 @@ class Enemy {
 
         if (dist < optimalDist - 20) {
             // Move away
-            this.x -= (dx / dist) * this.speed * deltaTime;
-            this.y -= (dy / dist) * this.speed * deltaTime;
+            const newX = this.x - (dx / dist) * this.speed * deltaTime;
+            const newY = this.y - (dy / dist) * this.speed * deltaTime;
+
+            if (dungeon.isWalkable(newX, this.y)) {
+                this.x = newX;
+            }
+            if (dungeon.isWalkable(this.x, newY)) {
+                this.y = newY;
+            }
         } else if (dist > optimalDist + 20) {
             // Move closer
-            this.x += (dx / dist) * this.speed * deltaTime;
-            this.y += (dy / dist) * this.speed * deltaTime;
+            const newX = this.x + (dx / dist) * this.speed * deltaTime;
+            const newY = this.y + (dy / dist) * this.speed * deltaTime;
+
+            if (dungeon.isWalkable(newX, this.y)) {
+                this.x = newX;
+            }
+            if (dungeon.isWalkable(this.x, newY)) {
+                this.y = newY;
+            }
         }
+
+        this.attack(player);
     }
 
     takeDamage(damage) {

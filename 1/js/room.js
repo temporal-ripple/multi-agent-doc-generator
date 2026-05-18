@@ -119,9 +119,9 @@ class Room {
         }
     }
 
-    update(deltaTime, player) {
+    update(deltaTime, player, dungeon) {
         this.enemies.forEach(enemy => {
-            enemy.update(deltaTime, player);
+            enemy.update(deltaTime, player, dungeon);
         });
     }
 

@@ -205,7 +205,7 @@ class Dungeon {
     update(deltaTime, player) {
         this.rooms.forEach(room => {
             if (room.visited) {
-                room.update(deltaTime, player);
+                room.update(deltaTime, player, this);
             }
         });
     }
