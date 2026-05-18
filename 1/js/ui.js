@@ -18,6 +18,10 @@ class UI {
             this.showAchievements();
         });
 
+        document.getElementById('btn-achievements-back').addEventListener('click', () => {
+            this.showMainMenu();
+        });
+
         document.getElementById('btn-back').addEventListener('click', () => {
             this.showMainMenu();
         });
@@ -45,6 +49,18 @@ class UI {
 
         // Keyboard shortcuts
         window.addEventListener('keydown', (e) => {
+            // Shop takes priority
+            if (this.shop.isOpen) {
+                const num = parseInt(e.key);
+                if (num >= 1 && num <= 9) {
+                    this.shop.buyItem(num - 1, this.game.player);
+                }
+                if (e.code === 'Escape') {
+                    this.shop.isOpen = false;
+                }
+                return; // Don't process other keys when shop is open
+            }
+
             if (e.code === 'Escape') {
                 if (this.game.state === GAME_STATES.PLAYING) {
                     this.game.pause();
@@ -58,17 +74,6 @@ class UI {
                 const num = parseInt(e.key);
                 if (num >= 1 && num <= 6) {
                     this.game.player.useItem(num - 1);
-                }
-            }
-
-            // Shop
-            if (this.shop.isOpen) {
-                const num = parseInt(e.key);
-                if (num >= 1 && num <= 9) {
-                    this.shop.buyItem(num - 1, this.game.player);
-                }
-                if (e.code === 'Escape') {
-                    this.shop.isOpen = false;
                 }
             }
         });
@@ -129,17 +134,41 @@ class UI {
         this.hideAllMenus();
         document.getElementById('game-over').classList.remove('hidden');
         document.getElementById('final-floor').textContent = floor;
+        document.querySelector('#game-over h2').textContent = '游戏结束';
     }
 
     showVictory() {
         achievements.check(ACHIEVEMENT_TYPES.FIRST_CLEAR);
-        this.showGameOver(10);
+        this.showGameOver(this.game.currentFloor);
         document.querySelector('#game-over h2').textContent = '恭喜通关！';
     }
 
     showAchievements() {
-        // TODO: Implement achievement display
-        console.log('Achievements:', achievements);
+        this.hideAllMenus();
+        document.getElementById('achievements-menu').classList.remove('hidden');
+        this.renderAchievementsList();
+    }
+
+    renderAchievementsList() {
+        const list = document.getElementById('achievements-list');
+        list.innerHTML = '';
+
+        const achievementTypes = Object.keys(ACHIEVEMENTS);
+        achievementTypes.forEach(type => {
+            const achievement = ACHIEVEMENTS[type];
+            const isUnlocked = achievements.isUnlocked(type);
+            const progress = achievements.getProgress(type);
+
+            const card = document.createElement('div');
+            card.className = `achievement-card ${isUnlocked ? 'unlocked' : 'locked'}`;
+            card.innerHTML = `
+                <div class="achievement-name">${achievement.name}</div>
+                <div class="achievement-desc">${achievement.description}</div>
+                <div class="achievement-progress">进度: ${progress}</div>
+                ${isUnlocked ? '<div class="achievement-reward">奖励: ' + achievement.reward + '</div>' : ''}
+            `;
+            list.appendChild(card);
+        });
     }
 
     hideAllMenus() {
