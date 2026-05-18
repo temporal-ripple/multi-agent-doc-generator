@@ -17,7 +17,7 @@ class Boss extends Enemy {
         this.height = TILE_SIZE * 2;
     }
 
-    update(deltaTime, player) {
+    update(deltaTime, player, dungeon) {
         this.patternTimer += deltaTime;
 
         // Phase transitions
@@ -35,18 +35,20 @@ class Boss extends Enemy {
 
         switch(this.attackPattern) {
             case 0: // Chase
-                this.updateChaser(deltaTime, player);
+                this.updateChaser(deltaTime, player, dungeon);
                 break;
             case 1: // Circle
-                this.updateCircle(deltaTime, player);
+                this.updateCircle(deltaTime, player, dungeon);
                 break;
             case 2: // Charge
-                this.updateCharge(deltaTime, player);
+                this.updateCharge(deltaTime, player, dungeon);
                 break;
         }
+
+        this.attack(player);
     }
 
-    updateCircle(deltaTime, player) {
+    updateCircle(deltaTime, player, dungeon) {
         const angle = Date.now() / 1000;
         const radius = TILE_SIZE * 3;
         const targetX = player.x + Math.cos(angle) * radius;
@@ -57,19 +59,33 @@ class Boss extends Enemy {
         const dist = Math.sqrt(dx * dx + dy * dy);
 
         if (dist > 0) {
-            this.x += (dx / dist) * this.speed * deltaTime;
-            this.y += (dy / dist) * this.speed * deltaTime;
+            const newX = this.x + (dx / dist) * this.speed * deltaTime;
+            const newY = this.y + (dy / dist) * this.speed * deltaTime;
+
+            if (dungeon.isWalkable(newX, this.y)) {
+                this.x = newX;
+            }
+            if (dungeon.isWalkable(this.x, newY)) {
+                this.y = newY;
+            }
         }
     }
 
-    updateCharge(deltaTime, player) {
+    updateCharge(deltaTime, player, dungeon) {
         const dx = player.x - this.x;
         const dy = player.y - this.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
         if (dist > 0) {
-            this.x += (dx / dist) * this.speed * 2 * deltaTime;
-            this.y += (dy / dist) * this.speed * 2 * deltaTime;
+            const newX = this.x + (dx / dist) * this.speed * 2 * deltaTime;
+            const newY = this.y + (dy / dist) * this.speed * 2 * deltaTime;
+
+            if (dungeon.isWalkable(newX, this.y)) {
+                this.x = newX;
+            }
+            if (dungeon.isWalkable(this.x, newY)) {
+                this.y = newY;
+            }
         }
     }
 
@@ -97,6 +113,7 @@ class Boss extends Enemy {
         // Drop loot
         this.dropBossLoot();
         game.player.addExp(100 + this.floor * 20);
+        game.player.enemiesKilled++;
     }
 
     dropBossLoot() {
