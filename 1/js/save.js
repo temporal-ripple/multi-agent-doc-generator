@@ -16,6 +16,8 @@ class SaveSystem {
                 spd: game.player.spd,
                 level: game.player.level,
                 exp: game.player.exp,
+                expToLevel: game.player.expToLevel,
+                skillMaxCooldown: game.player.skillMaxCooldown,
                 gold: game.player.gold,
                 keys: game.player.keys,
                 items: game.player.items,
@@ -28,8 +30,13 @@ class SaveSystem {
             timestamp: Date.now()
         };
 
-        localStorage.setItem(this.saveKey, JSON.stringify(data));
-        return true;
+        try {
+            localStorage.setItem(this.saveKey, JSON.stringify(data));
+            return true;
+        } catch (e) {
+            console.error('Save failed:', e);
+            return false;
+        }
     }
 
     load() {
@@ -52,6 +59,10 @@ class SaveSystem {
     }
 
     restoreGame(game, data) {
+        if (!data || !data.player || typeof data.floor !== 'number') {
+            return false;
+        }
+
         game.currentFloor = data.floor;
         game.player = new Player(data.player.characterType);
 
@@ -65,6 +76,8 @@ class SaveSystem {
             spd: data.player.spd,
             level: data.player.level,
             exp: data.player.exp,
+            expToLevel: data.player.expToLevel,
+            skillMaxCooldown: data.player.skillMaxCooldown,
             gold: data.player.gold,
             keys: data.player.keys,
             items: data.player.items,
@@ -77,6 +90,13 @@ class SaveSystem {
         game.dungeon = new Dungeon(game.currentFloor);
         game.dungeon.generate();
         game.state = GAME_STATES.PLAYING;
+
+        if (game.ui) {
+            game.ui.hideAllMenus();
+            game.ui.updateHUD();
+        }
+
+        return true;
     }
 }
 
